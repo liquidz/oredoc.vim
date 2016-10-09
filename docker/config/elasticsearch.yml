@@ -1,0 +1,25 @@
+# JVMがswapし始めるとelasticsearchは重くなる
+# mlockall オプションを有効にすることで固定メモリで動くようになる
+bootstrap.mlockall: true
+
+network:
+  host: 0.0.0.0
+
+index:
+  # コミットの頻度が高くなくても要件を満たせる場合や巨大なindexを登録する場合は
+  # 長く設定しておくことで index 更新時の負荷が減らせる
+  # 単位を指定しないと msec
+  refresh_interval: 10s
+
+  # analyzerの設定
+  analysis:
+    tokenizer:
+      kuromoji_user_dict:
+        type: kuromoji_tokenizer
+        mode: search
+        discard_punctuation: false
+        user_dictionary: userdict_ja.txt
+    analyzer:
+      ja:
+        type: custom
+        tokenizer: kuromoji_tokenizer
