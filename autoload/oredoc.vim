@@ -8,6 +8,11 @@ let g:oredoc#hostname = get(g:, 'oredoc#hostname', 'localhost')
 let g:oredoc#port     = get(g:, 'oredoc#port', 9200)
 let g:oredoc#index    = get(g:, 'oredoc#index', 'oredoc')
 
+let g:oredoc#errorformat = get(g:, 'oredoc#errorformat', join([
+    \ "%f\t%.%#L%l: %m",
+    \ "%f\t%m",
+    \ ], ','))
+
 function! oredoc#query(q) abort
   return {
       \ 'from': 0, 'size': 100,
@@ -49,10 +54,12 @@ function! oredoc#search(q) abort
     endfor
 
     let ef = &g:errorformat
-    let &g:errorformat = "%f\t%.%#L%l: %m"
+    let &g:errorformat = g:oredoc#errorformat
     cgetexpr result
     copen
     let &g:errorformat = ef
+  else
+    echo printf('Not found for "%s"', a:q)
   endif
 endfunction
 
