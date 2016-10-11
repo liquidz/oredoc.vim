@@ -1,6 +1,6 @@
 .PHONY: vitalize test doc lint clean
 PLUGIN_NAME = oredoc
-VITAL_MODULES = Web.HTTP
+VITAL_MODULES = Process
 
 vitalize:
 	vim -c "Vitalize . --name=$(PLUGIN_NAME) $(VITAL_MODULES)" -c q

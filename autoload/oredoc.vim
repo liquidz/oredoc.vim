@@ -1,12 +1,14 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:V    = vital#of('oredoc')
-let s:Http = s:V.import('Web.HTTP')
+let s:V       = vital#of('oredoc')
+let s:Process = s:V.import('Process')
 
 let g:oredoc#hostname = get(g:, 'oredoc#hostname', 'localhost')
 let g:oredoc#port     = get(g:, 'oredoc#port', 9200)
 let g:oredoc#index    = get(g:, 'oredoc#index', 'oredoc')
+let g:oredoc#curlopt  = get(g:, 'oredoc#curlopt', '')
+let g:oredoc#timeout  = get(g:, 'oredoc#timeout', 3000)
 
 let g:oredoc#errorformat = get(g:, 'oredoc#errorformat', join([
     \ "%f\t%.%#L%l: %m",
@@ -39,11 +41,26 @@ function! oredoc#url() abort
       \ g:oredoc#index)
 endfunction
 
-function! oredoc#search(q) abort
+function! oredoc#request(q) abort
   let url = oredoc#url()
-  let resp = json_decode(s:Http.request('GET', url, {
-      \ 'data': json_encode(oredoc#query(a:q))
-      \ }).content)
+  let q   = json_encode(oredoc#query(a:q))
+  let command = "curl -s "
+
+  if g:oredoc#curlopt != ''
+    let command .= printf('%s ', g:oredoc#curlopt)
+  endif
+
+  let command .= printf("-XGET %s -d '%s' ", url, q)
+
+  return json_decode(s:Process.system(command, {
+      \ 'timeout': g:oredoc#timeout
+      \ }))
+endfunction
+
+function! oredoc#search(q) abort
+  " TODO: executable('curl')
+
+  let resp = oredoc#request(a:q)
   if resp.hits.total > 0
     let result = []
     for hit in resp.hits.hits

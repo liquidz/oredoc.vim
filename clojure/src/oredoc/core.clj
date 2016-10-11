@@ -32,7 +32,7 @@
        io/file
        file-seq
        (remove #(.isDirectory %))
-       (remove #(re-seq #"\.git/" (.getAbsolutePath %)))))
+       (remove #(re-seq #"\.git" (.getAbsolutePath %)))))
 
 (defn slurp-and-add-line-nums
   [file]
